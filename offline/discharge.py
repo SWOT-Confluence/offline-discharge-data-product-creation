@@ -269,7 +269,7 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
                                     MISSING_VALUE_FLT)
         nalgo = np.sum(q_results.mask == False)
         if nalgo >= 1:
-            consensus_q = np.median(q_results)
+            consensus_q = np.ma.median(q_results)
             consensus_s_u = np.sqrt(np.pi / 2 * np.mean(q_s_u)**2 / nalgo)
             consensus_u = np.sqrt(consensus_s_u**2 + np.median(q_r_u)**2)
             consensus_s_rel_u = consensus_s_u / consensus_u
