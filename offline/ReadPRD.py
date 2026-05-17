@@ -12,14 +12,14 @@ def ReachDatabase(reach_db_path, rch):
     reach_ind = np.where(reaches == rch)
     reach = {'area_fits': {},
              'discharge_models': {'unconstrained': {'MetroMan': {},
-                                                    'BAM': {},
+                                                    'BUSBOI': {},
                                                     'HiVDI': {},
                                                     'MOMMA': {},
                                                     'SADS': {},
                                                     'SIC4DVar': {}},
 
                                   'constrained': {'MetroMan': {},
-                                                  'BAM': {},
+                                                  'BUSBOI': {},
                                                   'HiVDI': {},
                                                   'MOMMA': {},
                                                   'SADS': {},
@@ -59,9 +59,9 @@ def ReachDatabase(reach_db_path, rch):
             = np.array(dataset['reaches']['discharge_models']
                        ['unconstrained']['MetroMan'][key][reach_ind])
     for key in bam_key:
-        reach['discharge_models']['unconstrained']['BAM'][key] \
+        reach['discharge_models']['unconstrained']['BUSBOI'][key] \
             = np.array(dataset['reaches']['discharge_models']
-                       ['unconstrained']['BAM'][key][reach_ind])
+                       ['unconstrained']['BUSBOI'][key][reach_ind])
     for key in hivdi_key:
         reach['discharge_models']['unconstrained']['HiVDI'][key] \
             = np.array(dataset['reaches']['discharge_models']
@@ -85,9 +85,9 @@ def ReachDatabase(reach_db_path, rch):
             = np.array(dataset['reaches']['discharge_models']
                        ['constrained']['MetroMan'][key][reach_ind])
     for key in bam_key:
-        reach['discharge_models']['constrained']['BAM'][key] \
+        reach['discharge_models']['constrained']['BUSBOI'][key] \
             = np.array(dataset['reaches']['discharge_models']
-                       ['constrained']['BAM'][key][reach_ind])
+                       ['constrained']['BUSBOI'][key][reach_ind])
     for key in hivdi_key:
         reach['discharge_models']['constrained']['HiVDI'][key] \
             = np.array(dataset['reaches']['discharge_models']
