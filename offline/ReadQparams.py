@@ -23,7 +23,7 @@ def extract_alg(alg_dir, r_id, run_type):
     run_type: str
         constrained or unconstrained data product indicator
     """
-    gb_file = os.path.join(alg_dir, 'geobam', f'{r_id}_geobam.nc')
+    gb_file = os.path.join(alg_dir, 'busboi', f'{r_id}_busboi.nc')
     hv_file = os.path.join(alg_dir, 'hivdi', f'{r_id}_hivdi.nc')
     mo_file = os.path.join(alg_dir, 'momma', f'{r_id}_momma.nc')
     sd_file = os.path.join(alg_dir, 'sad', f'{r_id}_sad.nc')
@@ -79,7 +79,7 @@ def extract_valid(r_id, run_type, gb_file, hv_file, mo_file, sd_file,
     alg_dict = {
         'unconstrained': {
             'MetroMan': {},
-            'BAM': {},
+            'BUSBOI': {},
             'HiVDI': {},
             'MOMMA': {},
             'SADS': {},
@@ -87,7 +87,7 @@ def extract_valid(r_id, run_type, gb_file, hv_file, mo_file, sd_file,
         },
         'constrained': {
             'MetroMan': {},
-            'BAM': {},
+            'BUSBOI': {},
             'HiVDI': {},
             'MOMMA': {},
             'SADS': {},
@@ -95,15 +95,15 @@ def extract_valid(r_id, run_type, gb_file, hv_file, mo_file, sd_file,
         }
     }
 
-    # geobam
+    # busboi
     gb = Dataset(gb_file, 'r', format="NETCDF4")
-    alg_dict[run_type]['BAM'] = {
+    alg_dict[run_type]['BUSBOI'] = {
         "n": np.array(get_gb_data(gb, "logn", "mean", True)),
         # "Abar": np.array(np.nanmean(np.array(get_gb_data(gb, "A0", False))))
         "Abar": np.array(1)
         # Temp placeholder while work out neoBAM AO calculation
     }
-    alg_dict[non_run_type]['BAM'] = {
+    alg_dict[non_run_type]['BUSBOI'] = {
         "n": non_run_array,
         "Abar": non_run_array
     }
@@ -193,7 +193,7 @@ def indicate_no_data(r_id):
     alg_dict = {
         'unconstrained': {
             'MetroMan': {},
-            'BAM': {},
+            'BUSBOI': {},
             'HiVDI': {},
             'MOMMA': {},
             'SADS': {},
@@ -201,7 +201,7 @@ def indicate_no_data(r_id):
         },
         'constrained': {
             'MetroMan': {},
-            'BAM': {},
+            'BUSBOI': {},
             'HiVDI': {},
             'MOMMA': {},
             'SADS': {},
@@ -209,12 +209,12 @@ def indicate_no_data(r_id):
         }
     }
 
-    # geobam
-    alg_dict['unconstrained']['BAM'] = {
+    # busboi
+    alg_dict['unconstrained']['BUSBOI'] = {
         "n": np.nan,
         "Abar": np.nan
     }
-    alg_dict['constrained']['BAM'] = {
+    alg_dict['constrained']['BUSBOI'] = {
         "n": np.nan,
         "Abar": np.nan
     }

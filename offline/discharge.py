@@ -82,35 +82,35 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
             metro_r_u = MISSING_VALUE_FLT
             metro_u = MISSING_VALUE_FLT
 
-        # 3: Compute BAM model
-        bam_n = models['BAM']['n']
-        bam_Abar = models['BAM']['Abar']
-        bam_s_rel_u = models['BAM']['sbQ_rel'].item()
+        # 3: Compute BUSBOI model
+        bb_n = models['BUSBOI']['n']
+        bb_Abar = models['BUSBOI']['Abar']
+        bb_s_rel_u = models['BUSBOI']['sbQ_rel'].item()
 
-        if (reach_width > 0 and reach_slope > 0 and bam_Abar+d_x_area >= 0 and
-            bam_Abar > 0 and bam_n > 0):
+        if (reach_width > 0 and reach_slope > 0 and bb_Abar+d_x_area >= 0 and
+            bb_Abar > 0 and bb_n > 0):
 
-            bam_q = (
-                (d_x_area+bam_Abar)**(5/3) * reach_width**(-2/3) *
-                (reach_slope)**(1/2)) / bam_n
-            bam_width_u = (2 * reach_width_u) / (3 * reach_width)
-            bam_slp_u = reach_slope_u / (2 * reach_slope)
-            bam_d_x_area_u = 5 * d_x_area_u / (3 * (bam_Abar + d_x_area))
-            bam_r_u = np.sqrt(bam_width_u**2 + bam_slp_u**2 +
-                              bam_d_x_area_u**2)
-            if 0 <= bam_s_rel_u < 1:
-                bam_s_u, bam_u = discharge_uncertainty(bam_s_rel_u, bam_r_u)
+            bb_q = (
+                (d_x_area+bb_Abar)**(5/3) * reach_width**(-2/3) *
+                (reach_slope)**(1/2)) / bb_n
+            bb_width_u = (2 * reach_width_u) / (3 * reach_width)
+            bb_slp_u = reach_slope_u / (2 * reach_slope)
+            bb_d_x_area_u = 5 * d_x_area_u / (3 * (bb_Abar + d_x_area))
+            bb_r_u = np.sqrt(bb_width_u**2 + bb_slp_u**2 +
+                              bb_d_x_area_u**2)
+            if 0 <= bb_s_rel_u < 1:
+                bb_s_u, bb_u = discharge_uncertainty(bb_s_rel_u, bb_r_u)
             else:
-                bam_s_rel_u = MISSING_VALUE_FLT
-                bam_s_u = MISSING_VALUE_FLT
-                bam_u = MISSING_VALUE_FLT
+                bb_s_rel_u = MISSING_VALUE_FLT
+                bb_s_u = MISSING_VALUE_FLT
+                bb_u = MISSING_VALUE_FLT
 
         else:
-            bam_q = MISSING_VALUE_FLT
-            bam_s_rel_u = MISSING_VALUE_FLT
-            bam_s_u = MISSING_VALUE_FLT
-            bam_r_u = MISSING_VALUE_FLT
-            bam_u = MISSING_VALUE_FLT
+            bb_q = MISSING_VALUE_FLT
+            bb_s_rel_u = MISSING_VALUE_FLT
+            bb_s_u = MISSING_VALUE_FLT
+            bb_r_u = MISSING_VALUE_FLT
+            bb_u = MISSING_VALUE_FLT
 
         # 4: Compute HiVDI model
         hivdi_Abar = models['HiVDI']['Abar']
@@ -258,13 +258,13 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
             sic4dvar_u = MISSING_VALUE_FLT
 
         # 8: Compute consensus discharge and its uncertainties
-        q_results = np.ma.masked_values([metro_q, bam_q, hivdi_q, momma_q,
+        q_results = np.ma.masked_values([metro_q, bb_q, hivdi_q, momma_q,
                                          sads_q, sic4dvar_q],
                                         MISSING_VALUE_FLT)
-        q_r_u = np.ma.masked_values([metro_r_u, bam_r_u, hivdi_r_u, momma_r_u,
+        q_r_u = np.ma.masked_values([metro_r_u, bb_r_u, hivdi_r_u, momma_r_u,
                                      sads_r_u, sic4dvar_r_u],
                                     MISSING_VALUE_FLT)
-        q_s_u = np.ma.masked_values([metro_s_u, bam_s_u, hivdi_s_u,
+        q_s_u = np.ma.masked_values([metro_s_u, bb_s_u, hivdi_s_u,
                                      momma_s_u, sads_s_u, sic4dvar_s_u],
                                     MISSING_VALUE_FLT)
         nalgo = np.sum(q_results.mask == False)
@@ -286,9 +286,9 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
             outputs['dschg_gmsf'] = metro_s_rel_u
             outputs['dschg_gm_q'] = MISSING_VALUE_INT4
 
-            outputs['dschg_gb'] = bam_q
-            outputs['dschg_gb_u'] = bam_u
-            outputs['dschg_gbsf'] = bam_s_rel_u
+            outputs['dschg_gb'] = bb_q
+            outputs['dschg_gb_u'] = bb_u
+            outputs['dschg_gbsf'] = bb_s_rel_u
             outputs['dschg_gb_q'] = MISSING_VALUE_INT4
 
             outputs['dschg_gh'] = hivdi_q
@@ -322,9 +322,9 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
             outputs['dschg_msf'] = metro_s_rel_u
             outputs['dschg_m_q'] = MISSING_VALUE_INT4
 
-            outputs['dschg_b'] = bam_q
-            outputs['dschg_b_u'] = bam_u
-            outputs['dschg_bsf'] = bam_s_rel_u
+            outputs['dschg_b'] = bb_q
+            outputs['dschg_b_u'] = bb_u
+            outputs['dschg_bsf'] = bb_s_rel_u
             outputs['dschg_b_q'] = MISSING_VALUE_INT4
 
             outputs['dschg_h'] = hivdi_q

@@ -39,7 +39,7 @@ def extract_alg(alg_dir, r_id, run_type):
     alg_dict = {
         'unconstrained': {
             'MetroMan': {},
-            'BAM': {},
+            'BUSBOI': {},
             'HiVDI': {},
             'MOMMA': {},
             'SADS': {},
@@ -47,7 +47,7 @@ def extract_alg(alg_dir, r_id, run_type):
         },
         'constrained': {
             'MetroMan': {},
-            'BAM': {},
+            'BUSBOI': {},
             'HiVDI': {},
             'MOMMA': {},
             'SADS': {},
@@ -55,16 +55,16 @@ def extract_alg(alg_dir, r_id, run_type):
         }
     }
 
-    # geobam - to be implemented
-    alg_dict[run_type]['BAM'] = {
-        "n": int_data["neobam"]["n"][:].filled(np.nan),
-        "Abar": int_data["neobam"]["a0"][:].filled(np.nan),
-        "sbQ_rel": int_data["neobam"]["sbQ_rel"][:].filled(np.nan)
+    # busboi - to be implemented
+    alg_dict[run_type]['BUSBOI'] = {
+        "n": int_data["busboi"]["n"][:].filled(np.nan),
+        "Abar": int_data["busboi"]["a0"][:].filled(np.nan),
+        "sbQ_rel": int_data["busboi"]["sbQ_rel"][:].filled(np.nan)
     }
-    alg_dict[non_run_type]['BAM'] = {
+    alg_dict[non_run_type]['BUSBOI'] = {
         "n": non_run_array,
         "Abar": non_run_array,
-        "sbQ_rel": int_data["neobam"]["sbQ_rel"][:].filled(np.nan)
+        "sbQ_rel": int_data["busboi"]["sbQ_rel"][:].filled(np.nan)
     }
 
     # hivdi
