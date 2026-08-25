@@ -183,8 +183,8 @@ def main(input, output, index_to_run):
         area_fit={}
         area_fit['h_break']=obs['h_break'][:]
         area_fit['fit_coeffs']=obs['fit_coeffs'][:] #slope: index 1; intercept: index 0
-        nt=len(obs["wse"][:])
-        hhat,what=ConstrainWidth(obs["wse"][:],obs["width"][:],area_fit,nt)
+        nt=len(obs["height"][:])
+        hhat,what=ConstrainWidth(obs["height"][:],obs["width"][:],area_fit,nt)
         obs["width"]=what
         # Compute discharge        
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
