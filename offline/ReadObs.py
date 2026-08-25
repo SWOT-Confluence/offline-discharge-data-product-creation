@@ -40,6 +40,8 @@ def Rivertile(rivertile_path, input_type):
                      'slope_u': dataset['reach']['slope2_u'][:].filled(np.nan),
                      'd_x_area': dataset['reach']['d_x_area'][:].filled(np.nan),
                      'd_x_area_u': dataset['reach']['d_x_area_u'][:].filled(np.nan),
+                     'h_break': dataset['reach']['hwfit']['h_break'][:].filled(np.nan),
+                     'fit_coeffs': dataset['reach']['hwfit']['fit_coeffs'][:].filled(np.nan),
                      'nt': dataset.dimensions["nt"].size, "time_steps": dataset["observations"][:]}
         dataset.close()
     else:
