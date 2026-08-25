@@ -17,7 +17,7 @@ from offline.ReadQparamsIntegrator import extract_alg #  use with moi dir
 from offline.discharge import compute, empty_q
 from offline.WriteQ import write_q
 from offline.WriteQ2Shp import write_q2shp
-from offline.constraindwidth import ConstrainWidth
+from offline.constrainwidthMM import ConstrainWidth
 
 #Constants constrained
 # INPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input")
