@@ -181,10 +181,10 @@ def main(input, output, index_to_run):
 
         #constrain width need to make this optional in the future
         area_fit={}
-        area_fit['h_break']=obs['reach']['hwfit']['h_break'][:]
-        area_fit['fit_coeffs']=obs['reach']['hwfit']['fit_coeffs'][:] #slope: index 1; intercept: index 0
-        nt=len(obs.h[:])
-        hhat,what=ConstrainWidth(obss.h[:],obs.w[:],area_fit,nt)
+        area_fit['h_break']=obs['h_break'][:]
+        area_fit['fit_coeffs']=obs['fit_coeffs'][:] #slope: index 1; intercept: index 0
+        nt=len(obs["wse"][:])
+        hhat,what=ConstrainWidth(obss["wse"][:],obs["width"][:],area_fit,nt)
         obs["width"]=what
         # Compute discharge        
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
