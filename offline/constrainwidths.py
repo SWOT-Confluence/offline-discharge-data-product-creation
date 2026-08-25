@@ -44,5 +44,5 @@ def ConstrainWidth(h,w,area_fit,nt):
         constrain_mode=1
     if constrain_mode ==1:
         what=np.full( (nt,), np.nanmean(w) )
-
+    print('widths constrained')
     return hhat,what
