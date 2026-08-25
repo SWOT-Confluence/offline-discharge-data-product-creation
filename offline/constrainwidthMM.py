@@ -1,4 +1,4 @@
-'''
+"""
 Function to constrain widths to hypsometric curve
 
   Based on FLaPE-Byrd functions
@@ -6,7 +6,7 @@ Function to constrain widths to hypsometric curve
   by Mike, October, 2025
   ported to offline summer 26
 
-'''
+"""
 
 import numpy as np
 import sys
