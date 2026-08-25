@@ -1,3 +1,4 @@
+'''
 Function to constrain widths to hypsometric curve
 
   Based on FLaPE-Byrd functions
