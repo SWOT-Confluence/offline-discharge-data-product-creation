@@ -11,7 +11,30 @@ MISSING_VALUE_FLT = -999999999999
 
 
 def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
-            reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u):
+            reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
+    """Apply filters that resemble confluecen before computing discharge"""
+    if filterdict !=None:
+        badob=False #keep ob unless filter is tripped
+        badob=(filterdict['time'].isna()) | \
+        (filterdict['xtrk_dist'].abs() > 60e3) | (filterdict['xtrk_dist'].abs() < 10e3) | \
+        (filterdict['ice_clim_f'] > 1) | \
+        (filterdict['dark_frac'] > .6) | \
+        (filterdict['obs_frac_n'] < .4) | \
+        (filterdict['xovr_cal_q'] > 1) | \
+        (filterdict['n_good_nod'] < 10)
+        if badob:
+            reach_height=MISSING_VALUE_FLT
+            reach_height_u=MISSING_VALUE_FLT
+            reach_width=MISSING_VALUE_FLT
+            reach_width_u=MISSING_VALUE_FLT
+            reach_slope=MISSING_VALUE_FLT
+            reach_slope_u=MISSING_VALUE_FLT
+            reach_d_x_area=MISSING_VALUE_FLT
+            reach_d_x_area_u=MISSING_VALUE_FLT
+
+
+
+    
     """Computes the discharge models"""
     if 'area_fit' in reach.keys() and reach_d_x_area is None:
         with warnings.catch_warnings():

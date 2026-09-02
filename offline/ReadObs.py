@@ -42,7 +42,15 @@ def Rivertile(rivertile_path, input_type):
                      'd_x_area_u': dataset['reach']['d_x_area_u'][:].filled(np.nan),
                      'h_break': dataset['reach']['hwfit']['h_break'][:].filled(np.nan),
                      'fit_coeffs': dataset['reach']['hwfit']['fit_coeffs'][:].filled(np.nan),
-                     'nt': dataset.dimensions["nt"].size, "time_steps": dataset["observations"][:]}
+                     'nt': dataset.dimensions["nt"].size, "time_steps": dataset["observations"][:],
+                     'time':dataset['reach']['time'][:].filled(np.nan),
+                     'xtrk_dist':dataset['reach']['xtrk_dist'][:].filled(np.nan),
+                     'ice_clim_f':dataset['reach']['ice_clim_f'][:].filled(np.nan),
+                     'dark_frac':dataset['reach']['dark_frac'][:].filled(np.nan),
+                     'obs_frac_n':dataset['reach']['obs_frac_n'][:].filled(np.nan),
+                     'xovr_cal_q':dataset['reach']['xovr_cal_q'][:].filled(np.nan),
+                     'n_good_nod':dataset['reach']['n_good_nod'][:].filled(np.nan)
+                         }
         dataset.close()
     else:
         raise NotImplementedError(
