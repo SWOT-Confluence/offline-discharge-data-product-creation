@@ -128,6 +128,19 @@ def populate_data_array(data_dict, outputs, index):
     for k, v in data_dict.items():
         if k != "nt" and k != "reach_id" and k != "time_steps":
             v[np.isclose(v, -1.00000000e+12)] = np.nan
+def build_filter_dic(obs,i):
+    filterdict={}
+    filterdict['time']=obs['time'][i]
+    filterdict['xtrk_dist']=obs['xtrk_dist'][i]
+    filterdict['ice_clim_f']=obs['ice_clim_f'][i]
+    filterdict['dark_frac']=obs['dark_frac'][i]
+    filterdict['obs_frac_n']=obs['obs_frac_n'][i]
+    filterdict['xovr_cal_q']=obs['xovr_cal_q'][i]
+    filterdict['n_good_nod']=obs['n_good_nod'][i]
+    filterdict['p_width']=obs['p_width'][i]
+    filterdict['p_length']=obs['p_length'][i]
+    filterdict['reach_q_b']=obs['reach_q_b'][i]
+    return filterdict                       
 
 
 def main(input, output, index_to_run):
@@ -191,10 +204,11 @@ def main(input, output, index_to_run):
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
                                          reach_data["reach_id"])
         for i in range(obs["nt"]):
+            filterdict=build_filter_dic(obs,i)            
             outputs = compute(priors, obs["height"][i], obs["wse_u"][i],
                               obs["width"][i], obs["width_u"][i],
                               obs["slope"][i], obs["slope_u"][i],
-                              obs["d_x_area"][i], obs["d_x_area_u"][i])
+                              obs["d_x_area"][i], obs["d_x_area_u"][i],filterdict)
             populate_data_array(data_dict, outputs, i)
 
         # Output discharge model values
