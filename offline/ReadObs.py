@@ -49,7 +49,10 @@ def Rivertile(rivertile_path, input_type):
                      'dark_frac':dataset['reach']['dark_frac'][:].filled(np.nan),
                      'obs_frac_n':dataset['reach']['obs_frac_n'][:].filled(np.nan),
                      'xovr_cal_q':dataset['reach']['xovr_cal_q'][:].filled(np.nan),
-                     'n_good_nod':dataset['reach']['n_good_nod'][:]
+                     'n_good_nod':dataset['reach']['n_good_nod'][:],
+                     'p_width':dataset['reach']['p_width'][:].filled(np.nan),
+                     'p_length':dataset['reach']['p_length'][:].filled(np.nan),
+                     'reach_q_b':dataset['reach']['reach_q_b'][:].filled(np.nan),
                          }
         dataset.close()
     else:
