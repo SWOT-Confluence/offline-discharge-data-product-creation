@@ -21,7 +21,13 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
         (filterdict['dark_frac'] > .6) | \
         (filterdict['obs_frac_n'] < .4) | \
         (filterdict['xovr_cal_q'] > 1) | \
-        (filterdict['n_good_nod'] < 10)
+        (filterdict['n_good_nod'] < 10) | \ 
+        (filterdict['p_width'] < 60) | \
+        (filterdict['p_length'] < 5000) | \ 
+        (filterdict['reach_q_b'] > 507510784) #| \        
+        #(filterdict['prior_reach_slope'] < 3.4e-5)                
+       
+        
         if badob:
             reach_height=MISSING_VALUE_FLT
             reach_height_u=MISSING_VALUE_FLT
