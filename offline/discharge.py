@@ -9,7 +9,7 @@ MISSING_VALUE_INT4 = -999
 MISSING_VALUE_INT9 = -99999999
 MISSING_VALUE_FLT = -999999999999
 
-def filterNRTdata(reach, reach_height, reach_height_u, reach_width, reach_width_u,
+def filterNRTdata(reach_height, reach_height_u, reach_width, reach_width_u,
             reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
     if filterdict !=None:
         badob=False #keep ob unless filter is tripped
