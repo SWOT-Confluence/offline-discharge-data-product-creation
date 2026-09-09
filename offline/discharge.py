@@ -23,9 +23,12 @@ def filterNRTdata(reach, reach_height, reach_height_u, reach_width, reach_width_
         (filterdict['p_width'] < 60)|\
         (filterdict['p_length'] < 5000)|\
         (filterdict['reach_q_b'] > 507510784)|\
-        (reach_height<filterdict['H_lower_outlier'])|(reach_height>filterdict['H_upper_outlier'])|\
-        (reach_width<filterdict['W_lower_outlier'])|(reach_width>filterdict['W_upper_outlier'])|\
-        (reach_slope<filterdict['S_lower_outlier'])|(reach_slope>filterdict['S_upper_outlier'])|\                
+        (reach_height<filterdict['H_lower_outlier'])|\
+        (reach_height>filterdict['H_upper_outlier'])|\
+        (reach_width<filterdict['W_lower_outlier'])|\
+        (reach_width>filterdict['W_upper_outlier'])|\
+        (reach_slope<filterdict['S_lower_outlier'])|\
+        (reach_slope>filterdict['S_upper_outlier'])          
         if badob:
                 reach_height=MISSING_VALUE_FLT
                 reach_height_u=MISSING_VALUE_FLT
