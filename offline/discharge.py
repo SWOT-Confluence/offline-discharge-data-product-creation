@@ -46,11 +46,11 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
             reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
     
     """Apply filters that resemble confluence before computing discharge"""
-    reach_height, reach_height_u,reach_width,
-    reach_width_u,reach_slope,reach_slope_u,
-    reach_d_x_area, reach_d_x_area_u = filterNRTdata(
-    reach_height, reach_height_u, reach_width, 
-    reach_width_u,reach_slope, reach_slope_u,
+    reach_height, reach_height_u,reach_width,\
+    reach_width_u,reach_slope,reach_slope_u,\
+    reach_d_x_area, reach_d_x_area_u = filterNRTdata(\
+    reach_height, reach_height_u, reach_width, \
+    reach_width_u,reach_slope, reach_slope_u,\
     reach_d_x_area, reach_d_x_area_u,filterdict)
 
 
