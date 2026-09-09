@@ -117,12 +117,10 @@ def populate_data_array(data_dict, outputs, index):
 
     # Insert data
     data_dict["d_x_area"][index] = outputs["d_x_area"]
-    data_dict["d_x_area_u"][index] = outputs[
-        "d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
+    data_dict["d_x_area_u"][index] = outputs["d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
 
     for key in DSCHG_KEYS:
-        data_dict[key][index] = outputs[key][0] if type(
-            outputs[key]) is np.ndarray else outputs[key]
+        data_dict[key][index] = outputs[key][0] if type(outputs[key]) is np.ndarray else outputs[key]
 
     # Convert missing values to NaN values
     for k, v in data_dict.items():
