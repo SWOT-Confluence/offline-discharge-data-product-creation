@@ -13,8 +13,9 @@ def filterNRTdata(reach, reach_height, reach_height_u, reach_width, reach_width_
             reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
     if filterdict !=None:
         badob=False #keep ob unless filter is tripped
-        badob=(filterdict['time'].isna()) | \
-        (filterdict['xtrk_dist'].abs() > 60e3) | (filterdict['xtrk_dist'].abs() < 10e3) | \
+        badob=(np.isnan(filterdict['time'])) | \
+        (np.abs(filterdict['xtrk_dist']) > 60e3) |\
+        (np.abs(filterdict['xtrk_dist']) < 10e3) | \
         (filterdict['ice_clim_f'] > 1)|\
         (filterdict['dark_frac'] > .6)|\
         (filterdict['obs_frac_n'] < .4)|\
