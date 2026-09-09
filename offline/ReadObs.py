@@ -25,7 +25,7 @@ def filterNRTdata(rivertile,filterdict=None):
         reach_slope=[] 
         for i in range(len(rivertile['time'])):
             badob=False #keep ob unless filter is tripped
-            badob=(np.isnan(filterdict['time'][i])) | \
+            badob=np.any((np.isnan(filterdict['time'][i])) | \
             (np.abs(filterdict['xtrk_dist'][i]) > 60e3) | \
             (np.abs(filterdict['xtrk_dist']) < 10e3) | \
             (filterdict['ice_clim_f'][i] > 1) | \
@@ -35,7 +35,7 @@ def filterNRTdata(rivertile,filterdict=None):
             (filterdict['n_good_nod'][i] < 10) | \
             (filterdict['p_width'][i] < 60)| \
             (filterdict['p_length'][i] < 5000)|\
-            (filterdict['reach_q_b'][i] > 507510784)                
+            (filterdict['reach_q_b'][i] > 507510784))                
             if badob:
                     reach_height.append(np.nan)                    
                     reach_width.append(np.nan)                
