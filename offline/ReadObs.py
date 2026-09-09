@@ -26,8 +26,10 @@ def filterNRTdata(rivertile,filterdict=None):
         for i in range(len(rivertile['time'])):
             badob=False #keep ob unless filter is tripped
             print(filterdict['time'][i])
+            print(type(filterdict['time'][i]))
             print(np.isnan(filterdict['time'][i]))
-            badob=np.any((np.isnan(filterdict['time'][i])) | \
+            
+            badob=np.any((isinstance(filterdict['time'][i],(float) != True)) | \
             (np.abs(filterdict['xtrk_dist'][i]) > 60e3) | \
             (np.abs(filterdict['xtrk_dist']) < 10e3) | \
             (filterdict['ice_clim_f'][i] > 1) | \
