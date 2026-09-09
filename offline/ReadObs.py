@@ -27,7 +27,7 @@ def filterNRTdata(rivertile,filterdict=None):
             badob=False #keep ob unless filter is tripped
             badob=(np.isnan(filterdict['time'][i])) | \
             (np.abs(filterdict['xtrk_dist'][i]) > 60e3) | \
-            (filterdict['xtrk_dist'].abs() < 10e3) | \
+            (np.abs(filterdict['xtrk_dist']) < 10e3) | \
             (filterdict['ice_clim_f'][i] > 1) | \
             (filterdict['dark_frac'][i] > .6) | \
             (filterdict['obs_frac_n'][i] < .4) | \
