@@ -26,19 +26,20 @@ def filterNRTdata(rivertile,filterdict=None):
         for i in range(len(rivertile['time'])):
             badob=False #keep ob unless filter is tripped
             print(filterdict['time'][i])
-            print(isinstance(filterdict['time'][i],(float)))
-            print(isinstance(filterdict['time'][i],(float)) != True)           
-            badob=np.any((isinstance(filterdict['time'][i],(float)) != True) | \
-            (np.abs(filterdict['xtrk_dist'][i]) > 60e3) | \
-            (np.abs(filterdict['xtrk_dist']) < 10e3) | \
-            (filterdict['ice_clim_f'][i] > 1) | \
-            (filterdict['dark_frac'][i] > .6) | \
-            (filterdict['obs_frac_n'][i] < .4) | \
-            (filterdict['xovr_cal_q'][i] > 1) | \
-            (filterdict['n_good_nod'][i] < 10) | \
-            (filterdict['p_width'][i] < 60)| \
-            (filterdict['p_length'][i] < 5000)|\
-            (filterdict['reach_q_b'][i] > 507510784))                
+            if np.isnan(filterdict['time'][i]):
+                badob=True
+            else:
+                   
+                badob=np.any((np.abs(filterdict['xtrk_dist'][i]) > 60e3) | \
+                (np.abs(filterdict['xtrk_dist']) < 10e3) | \
+                (filterdict['ice_clim_f'][i] > 1) | \
+                (filterdict['dark_frac'][i] > .6) | \
+                (filterdict['obs_frac_n'][i] < .4) | \
+                (filterdict['xovr_cal_q'][i] > 1) | \
+                (filterdict['n_good_nod'][i] < 10) | \
+                (filterdict['p_width'][i] < 60)| \
+                (filterdict['p_length'][i] < 5000)|\
+                (filterdict['reach_q_b'][i] > 507510784))                
             if badob:
                     reach_height.append(np.nan)                    
                     reach_width.append(np.nan)                
@@ -147,7 +148,7 @@ def Rivertile(rivertile_path, input_type):
         rivertile['H_lower_outlier']=Tukey_fliter_lims['H_lower_outlier']
         rivertile['S_upper_outlier']=Tukey_fliter_lims['S_upper_outlier']
         rivertile['S_lower_outlier']=Tukey_fliter_lims['S_lower_outlier']
-       
+        
                 
     else:
         raise NotImplementedError(

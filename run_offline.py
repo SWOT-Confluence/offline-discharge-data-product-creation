@@ -140,6 +140,12 @@ def build_filter_dic(obs,i):
     filterdict['p_width']=obs['p_width'][i]
     filterdict['p_length']=obs['p_length'][i]
     filterdict['reach_q_b']=obs['reach_q_b'][i]
+    filterdict['W_upper_outlier']=obs['W_upper_outlier'][i]
+    filterdict['W_lower_outlier']=obs['W_lower_outlier'][i]
+    filterdict['H_upper_outlier']=obs['H_upper_outlier'][i]
+    filterdict['H_lower_outlier']=obs['H_lower_outlier'][i]
+    filterdict['S_upper_outlier']=obs['S_upper_outlier'][i]
+    filterdict['S_lower_outlier']=obs['S_lower_outlier'][i]
     return filterdict                       
 
 
