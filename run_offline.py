@@ -140,12 +140,12 @@ def build_filter_dic(obs,i):
     filterdict['p_width']=obs['p_width'][i]
     filterdict['p_length']=obs['p_length'][i]
     filterdict['reach_q_b']=obs['reach_q_b'][i]
-    filterdict['W_upper_outlier']=obs['W_upper_outlier'][i]
-    filterdict['W_lower_outlier']=obs['W_lower_outlier'][i]
-    filterdict['H_upper_outlier']=obs['H_upper_outlier'][i]
-    filterdict['H_lower_outlier']=obs['H_lower_outlier'][i]
-    filterdict['S_upper_outlier']=obs['S_upper_outlier'][i]
-    filterdict['S_lower_outlier']=obs['S_lower_outlier'][i]
+    filterdict['W_upper_outlier']=obs['W_upper_outlier']
+    filterdict['W_lower_outlier']=obs['W_lower_outlier']
+    filterdict['H_upper_outlier']=obs['H_upper_outlier']
+    filterdict['H_lower_outlier']=obs['H_lower_outlier']
+    filterdict['S_upper_outlier']=obs['S_upper_outlier']
+    filterdict['S_lower_outlier']=obs['S_lower_outlier']
     return filterdict                       
 
 
@@ -185,7 +185,7 @@ def main(input, output, index_to_run):
     if input_type == 'timeseries':
         reach_data = get_reach_data(reach_json, index_to_run)
         obs = Rivertile(os.path.join(input , "swot" , reach_data["swot"]), input_type)
-        print(flp_source)
+        
         if flp_source == 'sword':
             priors = ReachDatabase(os.path.join(input , "sword" , reach_data["sword"]),
                                    reach_data["reach_id"])
