@@ -117,8 +117,7 @@ def populate_data_array(data_dict, outputs, index):
 
     # Insert data
     data_dict["d_x_area"][index] = outputs["d_x_area"]
-    #print(index)
-    #print(outputs["d_x_area_u"])
+   
     data_dict["d_x_area_u"][index] = outputs["d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
 
     for key in DSCHG_KEYS:
@@ -266,7 +265,7 @@ if __name__ == "__main__":
     except IndexError:
         index_to_run = -235  # AWS
 
-    # print('indx=',index_to_run)
+   
 
     main(INPUT, OUTPUT, index_to_run)
 

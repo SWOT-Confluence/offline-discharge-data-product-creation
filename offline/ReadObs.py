@@ -25,7 +25,7 @@ def filterNRTdata(rivertile,filterdict=None):
         reach_slope=[] 
         for i in range(len(rivertile['time'])):
             badob=False #keep ob unless filter is tripped
-            print(filterdict['time'][i])
+            #print(filterdict['time'][i])
             if np.isnan(filterdict['time'][i]):
                 badob=True
             else:

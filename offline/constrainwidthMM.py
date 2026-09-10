@@ -16,11 +16,11 @@ def ConstrainWidth(h,w,area_fit,nt):
     hhat=np.full( (nt,) ,np.nan)
     what=np.full( (nt,) ,np.nan)
     #nt=len(hhat)
-    print('nt=',nt)
-    print(np.shape(h))
+    #print('nt=',nt)
+    #print(np.shape(h))
 
     h_break=area_fit['h_break']
-    print(h_break)
+    #print(h_break)
     if np.any(np.isnan(h_break)):
         constrain_mode=1
         print('bad data in height-width fits. set widths equal to average value')

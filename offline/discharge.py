@@ -13,23 +13,25 @@ def filterNRTdata(reach_height, reach_height_u, reach_width, reach_width_u,
             reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
     if filterdict !=None:
         badob=False #keep ob unless filter is tripped
-        badob=np.any((np.isnan(filterdict['time'])) | \
-        (np.abs(filterdict['xtrk_dist']) > 60e3) |\
-        (np.abs(filterdict['xtrk_dist']) < 10e3) | \
-        (filterdict['ice_clim_f'] > 1)|\
-        (filterdict['dark_frac'] > .6)|\
-        (filterdict['obs_frac_n'] < .4)|\
-        (filterdict['xovr_cal_q'] > 1)|\
-        (filterdict['n_good_nod'] < 10)|\
-        (filterdict['p_width'] < 60)|\
-        (filterdict['p_length'] < 5000)|\
-        (filterdict['reach_q_b'] > 507510784)|\
-        (reach_height<filterdict['H_lower_outlier'])|\
-        (reach_height>filterdict['H_upper_outlier'])|\
-        (reach_width<filterdict['W_lower_outlier'])|\
-        (reach_width>filterdict['W_upper_outlier'])|\
-        (reach_slope<filterdict['S_lower_outlier'])|\
-        (reach_slope>filterdict['S_upper_outlier']))          
+        if np.isnan(filterdict['time']):
+            badob=True
+        else:                    
+            badob=np.any((np.abs(filterdict['xtrk_dist']) > 60e3) |\
+            (np.abs(filterdict['xtrk_dist']) < 10e3) | \
+            (filterdict['ice_clim_f'] > 1)|\
+            (filterdict['dark_frac'] > .6)|\
+            (filterdict['obs_frac_n'] < .4)|\
+            (filterdict['xovr_cal_q'] > 1)|\
+            (filterdict['n_good_nod'] < 10)|\
+            (filterdict['p_width'] < 60)|\
+            (filterdict['p_length'] < 5000)|\
+            (filterdict['reach_q_b'] > 507510784)|\
+            (reach_height<filterdict['H_lower_outlier'])|\
+            (reach_height>filterdict['H_upper_outlier'])|\
+            (reach_width<filterdict['W_lower_outlier'])|\
+            (reach_width>filterdict['W_upper_outlier'])|\
+            (reach_slope<filterdict['S_lower_outlier'])|\
+            (reach_slope>filterdict['S_upper_outlier']))          
         if badob:
                 reach_height=MISSING_VALUE_FLT
                 reach_height_u=MISSING_VALUE_FLT
