@@ -24,7 +24,10 @@ def filterNRTdata(rivertile,filterdict=None):
         reach_width=[]
         reach_slope=[] 
         for i in range(len(rivertile['time'])):
-            badob=False #keep ob unless filter is tripped           
+            badob=False #keep ob unless filter is tripped
+            print(filterdict['time'][i])
+            print(isinstance(filterdict['time'][i],(float)))
+            print(isinstance(filterdict['time'][i],(float)) != True)           
             badob=np.any((isinstance(filterdict['time'][i],(float)) != True) | \
             (np.abs(filterdict['xtrk_dist'][i]) > 60e3) | \
             (np.abs(filterdict['xtrk_dist']) < 10e3) | \
