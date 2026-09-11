@@ -55,36 +55,53 @@ def filterNRTdata(rivertile,filterdict=None):
     }   
                 
     return FRT
-def OutlierFilter(rivertile,Tukey_number=1.5):
-  
-  Wobs=rivertile['reach_width']
-  Hobs=rivertile['reach_height']
-  Sobs=rivertile['reach_slope']
-  
-  
-  #flag and remove all data that are > n IQRs away from the upper and lower quartile (Tukey method)
-  
-  #calculate quartiles
-  W_IQR = np.quantile(Wobs,[0.25,0.75])
-  W_upper_outlier=W_IQR[1] + (Tukey_number* (W_IQR[1]-W_IQR[0]))
-  W_lower_outlier=W_IQR[0] - (Tukey_number* (W_IQR[1]-W_IQR[0]))
-  
-  H_IQR = np.quantile(Hobs,[0.25,0.75])
-  H_upper_outlier=H_IQR[1] + (Tukey_number* (H_IQR[1]-H_IQR[0]))
-  H_lower_outlier=H_IQR[0] - (Tukey_number* (H_IQR[1]-H_IQR[0]))
-  
-  S_IQR = np.quantile(Sobs,[0.25,0.75])
-  S_upper_outlier=S_IQR[1] + (Tukey_number* (S_IQR[1]-S_IQR[0]))
-  S_lower_outlier=S_IQR[0] - (Tukey_number* (S_IQR[1]-S_IQR[0]))
-  Tukey_fliter_lims={
-      'W_upper_outlier' : W_upper_outlier,
-      'W_lower_outlier' : W_lower_outlier,
-      'H_upper_outlier' : H_upper_outlier,
-      'H_lower_outlier' : H_lower_outlier,
-      'S_upper_outlier' : S_upper_outlier,
-      'S_lower_outlier' : S_lower_outlier      
-  }
-  return Tukey_fliter_lims
+def OutlierFilter(rivertile,Tukey_number=1.5,filterdict=None):
+    if filterdict !=None:
+        Wobs=rivertile['reach_width']
+        Hobs=rivertile['reach_height']
+        Sobs=rivertile['reach_slope']
+        
+        
+        #flag and remove all data that are > n IQRs away from the upper and lower quartile (Tukey method)
+        
+        #calculate quartiles
+        W_IQR = np.quantile(Wobs,[0.25,0.75])
+        W_upper_outlier=W_IQR[1] + (Tukey_number* (W_IQR[1]-W_IQR[0]))
+        W_lower_outlier=W_IQR[0] - (Tukey_number* (W_IQR[1]-W_IQR[0]))
+        
+        H_IQR = np.quantile(Hobs,[0.25,0.75])
+        H_upper_outlier=H_IQR[1] + (Tukey_number* (H_IQR[1]-H_IQR[0]))
+        H_lower_outlier=H_IQR[0] - (Tukey_number* (H_IQR[1]-H_IQR[0]))
+        
+        S_IQR = np.quantile(Sobs,[0.25,0.75])
+        S_upper_outlier=S_IQR[1] + (Tukey_number* (S_IQR[1]-S_IQR[0]))
+        S_lower_outlier=S_IQR[0] - (Tukey_number* (S_IQR[1]-S_IQR[0]))
+        Tukey_fliter_lims={
+            'W_upper_outlier' : W_upper_outlier,
+            'W_lower_outlier' : W_lower_outlier,
+            'H_upper_outlier' : H_upper_outlier,
+            'H_lower_outlier' : H_lower_outlier,
+            'S_upper_outlier' : S_upper_outlier,
+            'S_lower_outlier' : S_lower_outlier      
+        }
+    else:
+        #filter limits set to range of existing data
+        Tukey_fliter_lims={
+                    'W_upper_outlier' : np.nanmax(Wobs),
+                    'W_lower_outlier' : np.nanmin(Wobs),
+                    'H_upper_outlier' : np.nanmax(Hobs),
+                    'H_lower_outlier' : np.nanmin(Hobs),
+                    'S_upper_outlier' : np.nanmax(Sobs),
+                    'S_lower_outlier' : np.nanmin(Sobs)      
+                }
+    return Tukey_fliter_lims
+def testforfiltering(SWOTts):
+    do_filter=True
+    time_filter=~np.isnan(SWOTts['reach/time'][:].filled(np.nan)) #filter for times when there was data based on time variable
+    do_filter=~np.any((np.any(np.isnan(['reach/wse'][:].filled(np.nan)[time_filter])))|\
+    (np.any(np.isnan(['reach/width'][:].filled(np.nan)[time_filter])))|\
+    (np.any(np.isnan(['reach/slope2'][:].filled(np.nan)[time_filter]))))
+    return do_filter
 
 def Rivertile(rivertile_path, input_type):
     """
@@ -137,11 +154,16 @@ def Rivertile(rivertile_path, input_type):
                      'p_length':dataset['reach']['p_length'][:].filled(np.nan),
                      'reach_q_b':dataset['reach']['reach_q_b'][:].filled(np.nan)
                          }
+        #test to see if data has been filtered
+        do_filter=testforfiltering(dataset)
         dataset.close()
+        if do_filter:
         #need to filter data prior to calculating Tukey filter values
-        filterdict=build_filter_dic(rivertile)
+            filterdict=build_filter_dic(rivertile)
+        else:
+            filterdict=None
         filtered_rivertile=filterNRTdata(rivertile,filterdict)
-        Tukey_fliter_lims=OutlierFilter(filtered_rivertile)
+        Tukey_fliter_lims=OutlierFilter(filtered_rivertile,filterdict)
         rivertile['W_upper_outlier']=Tukey_fliter_lims['W_upper_outlier']
         rivertile['W_lower_outlier']=Tukey_fliter_lims['W_lower_outlier']
         rivertile['H_upper_outlier']=Tukey_fliter_lims['H_upper_outlier']
