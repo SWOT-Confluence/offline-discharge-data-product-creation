@@ -19,6 +19,7 @@ def build_filter_dic(obs):
     return filterdict    
 
 def filterNRTdata(rivertile,filterdict=None):
+    
     if filterdict !=None:
         reach_height=[]
         reach_width=[]
@@ -48,6 +49,11 @@ def filterNRTdata(rivertile,filterdict=None):
                  reach_height.append(rivertile['height'][i])                    
                  reach_width.append(rivertile['width'][i])            
                  reach_slope.append(rivertile['slope'][i])
+    else:
+        reach_height=rivertile['height']                   
+        reach_width=rivertile['width']           
+        reach_slope=rivertile['slope']
+
     FRT={'reach_height':reach_height,
          'reach_width':reach_width,
          'reach_slope':reach_slope
