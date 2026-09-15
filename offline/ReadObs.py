@@ -62,10 +62,10 @@ def filterNRTdata(rivertile,filterdict=None):
                 
     return FRT
 def OutlierFilter(rivertile,Tukey_number=1.5,filterdict=None):
-    if filterdict !=None:
-        Wobs=rivertile['reach_width']
-        Hobs=rivertile['reach_height']
-        Sobs=rivertile['reach_slope']
+    Wobs=rivertile['reach_width']
+    Hobs=rivertile['reach_height']
+    Sobs=rivertile['reach_slope']
+    if filterdict !=None:     
         
         
         #flag and remove all data that are > n IQRs away from the upper and lower quartile (Tukey method)
