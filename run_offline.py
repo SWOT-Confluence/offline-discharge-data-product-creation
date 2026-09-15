@@ -17,6 +17,7 @@ from offline.ReadQparamsIntegrator import extract_alg #  use with moi dir
 from offline.discharge import compute, empty_q
 from offline.WriteQ import write_q
 from offline.WriteQ2Shp import write_q2shp
+from offline.constrainwidthMM import ConstrainWidth
 
 #Constants constrained
 # INPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input")
@@ -116,17 +117,35 @@ def populate_data_array(data_dict, outputs, index):
 
     # Insert data
     data_dict["d_x_area"][index] = outputs["d_x_area"]
-    data_dict["d_x_area_u"][index] = outputs[
-        "d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
+   
+    data_dict["d_x_area_u"][index] = outputs["d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
 
     for key in DSCHG_KEYS:
-        data_dict[key][index] = outputs[key][0] if type(
-            outputs[key]) is np.ndarray else outputs[key]
+        data_dict[key][index] = outputs[key][0] if type(outputs[key]) is np.ndarray else outputs[key]
 
     # Convert missing values to NaN values
     for k, v in data_dict.items():
         if k != "nt" and k != "reach_id" and k != "time_steps":
             v[np.isclose(v, -1.00000000e+12)] = np.nan
+def build_filter_dic(obs,i):
+    filterdict={}
+    filterdict['time']=obs['time'][i]
+    filterdict['xtrk_dist']=obs['xtrk_dist'][i]
+    filterdict['ice_clim_f']=obs['ice_clim_f'][i]
+    filterdict['dark_frac']=obs['dark_frac'][i]
+    filterdict['obs_frac_n']=obs['obs_frac_n'][i]
+    filterdict['xovr_cal_q']=obs['xovr_cal_q'][i]
+    filterdict['n_good_nod']=obs['n_good_nod'][i]
+    filterdict['p_width']=obs['p_width'][i]
+    filterdict['p_length']=obs['p_length'][i]
+    filterdict['reach_q_b']=obs['reach_q_b'][i]
+    filterdict['W_upper_outlier']=obs['W_upper_outlier']
+    filterdict['W_lower_outlier']=obs['W_lower_outlier']
+    filterdict['H_upper_outlier']=obs['H_upper_outlier']
+    filterdict['H_lower_outlier']=obs['H_lower_outlier']
+    filterdict['S_upper_outlier']=obs['S_upper_outlier']
+    filterdict['S_lower_outlier']=obs['S_lower_outlier']
+    return filterdict                       
 
 
 def main(input, output, index_to_run):
@@ -165,7 +184,7 @@ def main(input, output, index_to_run):
     if input_type == 'timeseries':
         reach_data = get_reach_data(reach_json, index_to_run)
         obs = Rivertile(os.path.join(input , "swot" , reach_data["swot"]), input_type)
-        print(flp_source)
+        
         if flp_source == 'sword':
             priors = ReachDatabase(os.path.join(input , "sword" , reach_data["sword"]),
                                    reach_data["reach_id"])
@@ -179,14 +198,22 @@ def main(input, output, index_to_run):
         else:
             sys.exit('Warning: flp source not valid, exiting')
 
-        # Compute discharge
+        #constrain width need to make this optional in the future
+        area_fit={}
+        area_fit['h_break']=obs['h_break'][:]
+        area_fit['fit_coeffs']=obs['fit_coeffs'][:] #slope: index 1; intercept: index 0
+        nt=len(obs["height"][:])
+        hhat,what=ConstrainWidth(obs["height"][:],obs["width"][:],area_fit,nt)
+        obs["width"]=what
+        # Compute discharge        
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
                                          reach_data["reach_id"])
         for i in range(obs["nt"]):
+            filterdict=build_filter_dic(obs,i)            
             outputs = compute(priors, obs["height"][i], obs["wse_u"][i],
                               obs["width"][i], obs["width_u"][i],
                               obs["slope"][i], obs["slope_u"][i],
-                              obs["d_x_area"][i], obs["d_x_area_u"][i])
+                              obs["d_x_area"][i], obs["d_x_area_u"][i],filterdict)
             populate_data_array(data_dict, outputs, i)
 
         # Output discharge model values
@@ -238,7 +265,7 @@ if __name__ == "__main__":
     except IndexError:
         index_to_run = -235  # AWS
 
-    # print('indx=',index_to_run)
+   
 
     main(INPUT, OUTPUT, index_to_run)
 
