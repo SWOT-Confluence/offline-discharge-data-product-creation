@@ -98,9 +98,9 @@ def OutlierFilter(rivertile,Tukey_number=1.5,filterdict=None):
 def testforfiltering(SWOTts):
     do_filter=True
     time_filter=~np.isnan(SWOTts['reach/time'][:].filled(np.nan)) #filter for times when there was data based on time variable
-    do_filter=~np.any((np.any(np.isnan(['reach/wse'][:].filled(np.nan)[time_filter])))|\
-    (np.any(np.isnan(['reach/width'][:].filled(np.nan)[time_filter])))|\
-    (np.any(np.isnan(['reach/slope2'][:].filled(np.nan)[time_filter]))))
+    do_filter=~np.any((np.any(np.isnan(['reach/wse'][:][time_filter])))|\
+    (np.any(np.isnan(['reach/width'][:][time_filter])))|\
+    (np.any(np.isnan(['reach/slope2'][:][time_filter]))))
     return do_filter
 
 def Rivertile(rivertile_path, input_type):
