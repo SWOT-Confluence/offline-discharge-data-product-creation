@@ -59,6 +59,17 @@ class SharedPreprocessingTest(unittest.TestCase):
         self.assertTrue(np.isnan(used[0]))
         self.assertEqual(used[1], fp.SLOPE_FLOOR)
 
+    def test_dA_gap_only_invalidates_dA_driven_laws(self):
+        h = np.linspace(10., 11., NT)
+        dA = np.linspace(-50., 50., NT)
+        dA[4] = np.nan
+        prep = fp.prepare_flowlaw_inputs(
+            h, np.full(NT, 100.), np.full(NT, 1e-4),
+            {'h_break': np.full(4, np.nan), 'fit_coeffs': None},
+            None, dA=dA)
+        self.assertTrue(prep['flowlaw_valid'][4])
+        self.assertFalse(prep['flowlaw_valid_da'][4])
+
     def test_rivertile_tolerates_missing_hwfit(self):
         with tempfile.TemporaryDirectory() as tmp:
             for hwfit in (True, False):
@@ -74,16 +85,54 @@ class SharedPreprocessingTest(unittest.TestCase):
 
     def test_preprocess_options_come_from_the_integrator_file(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with Dataset(os.path.join(tmp, '7_integrator.nc'), 'w'):
+            old_path = os.path.join(tmp, '7_integrator.nc')
+            with Dataset(old_path, 'w'):
                 pass
-            self.assertEqual(run_offline.read_preprocess_config(tmp, 7), {
-                'observation_filter': fp.DEFAULT_OBSERVATION_FILTER,
-                'slope_policy': fp.DEFAULT_SLOPE_POLICY})
-            with Dataset(os.path.join(tmp, '8_integrator.nc'), 'w') as ds:
+            with self.assertRaisesRegex(ValueError, 'version is missing'):
+                run_offline.read_preprocess_config(old_path)
+
+            path = os.path.join(tmp, '8_integrator.nc')
+            with Dataset(path, 'w') as ds:
+                ds.setncattr(fp.CONFIG_ATTRIBUTES['preprocess_version'],
+                             fp.PREPROCESS_VERSION)
                 ds.setncattr(fp.CONFIG_ATTRIBUTES['observation_filter'], 'robust_v2')
                 ds.setncattr(fp.CONFIG_ATTRIBUTES['slope_policy'], 'l2_3p4')
-            self.assertEqual(run_offline.read_preprocess_config(tmp, 8), {
+            self.assertEqual(run_offline.read_preprocess_config(path), {
                 'observation_filter': 'robust_v2', 'slope_policy': 'l2_3p4'})
+
+    def test_preprocess_options_come_from_the_sword_branch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'sword.nc')
+            with Dataset(path, 'w') as ds:
+                reaches = ds.createGroup('reaches')
+                models = reaches.createGroup('discharge_models')
+                branch = models.createGroup('constrained')
+                branch.setncattr(fp.CONFIG_ATTRIBUTES['preprocess_version'],
+                                 fp.PREPROCESS_VERSION)
+                branch.setncattr(fp.CONFIG_ATTRIBUTES['observation_filter'],
+                                 fp.FILTER_ROBUST_V2)
+                branch.setncattr(fp.CONFIG_ATTRIBUTES['slope_policy'],
+                                 fp.SLOPE_L2_3P4)
+            self.assertEqual(
+                run_offline.read_preprocess_config(path, 'constrained'),
+                {'observation_filter': fp.FILTER_ROBUST_V2,
+                 'slope_policy': fp.SLOPE_L2_3P4})
+
+    def test_original_sword_without_record_uses_defaults(self):
+        defaults = {'observation_filter': fp.DEFAULT_OBSERVATION_FILTER,
+                    'slope_policy': fp.DEFAULT_SLOPE_POLICY}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'na_sword_v17.nc')
+            with Dataset(path, 'w') as ds:
+                ds.createGroup('reaches').createGroup(
+                    'discharge_models').createGroup('constrained')
+            # 'unconstrained' is absent from the file altogether.
+            for branch in ('constrained', 'unconstrained'):
+                self.assertEqual(
+                    run_offline.read_preprocess_config(path, branch), defaults)
+            # Integrator mode stays strict.
+            with self.assertRaises(ValueError):
+                run_offline.read_preprocess_config(path)
 
 
 if __name__ == '__main__':

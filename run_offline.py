@@ -19,6 +19,7 @@ from offline.WriteQ import write_q
 from offline.WriteQ2Shp import write_q2shp
 from offline.constrainwidthMM import ConstrainWidth
 from offline.flowlaw_preprocess import (
+    CONFIG_ATTRIBUTES, DEFAULT_OBSERVATION_FILTER, DEFAULT_SLOPE_POLICY,
     QUALITY_VARIABLES, prepare_flowlaw_inputs, read_config)
 from netCDF4 import Dataset
 
@@ -68,11 +69,27 @@ def get_reach_data(reach_json, index_to_run):
     return data[index]
 
 
-def read_preprocess_config(flpe_dir, reach_id):
-    """Preprocessing options MOI recorded in this reach's integrator file."""
-    path = os.path.join(flpe_dir, f"{int(reach_id)}_integrator.nc")
+def read_preprocess_config(path, branch=None):
+    """Preprocessing options MOI recorded for these flow-law parameters.
+
+    Integrator mode (branch=None, the production path) requires the record.
+    SWORD mode is a fallback that normally reads the original SWORD, which has
+    no record: the defaults are used then instead of stopping the run.
+    """
     with Dataset(path) as dataset:
-        return read_config(dataset)
+        if branch is None:
+            return read_config(dataset)
+        try:
+            group = dataset['reaches']['discharge_models'][branch]
+        except (IndexError, KeyError):
+            group = None
+        if (group is None or CONFIG_ATTRIBUTES['preprocess_version']
+                not in group.ncattrs()):
+            print(f'No flow-law preprocessing record in {path} ({branch}); '
+                  'using the default preprocessing options')
+            return {'observation_filter': DEFAULT_OBSERVATION_FILTER,
+                    'slope_policy': DEFAULT_SLOPE_POLICY}
+        return read_config(group)
 
 
 def initialize_data_dict(nt, time_steps, reach_id):
@@ -214,11 +231,17 @@ def main(input, output, index_to_run):
         area_fit={}
         area_fit['h_break']=obs['h_break']
         area_fit['fit_coeffs']=obs['fit_coeffs']
-        config = (read_preprocess_config(FLPE_DIR, reach_data["reach_id"])
-                  if flp_source == 'integrator' else {})
+        if flp_source == 'integrator':
+            config_path = os.path.join(
+                FLPE_DIR, f'{int(reach_data["reach_id"])}_integrator.nc')
+            config = read_preprocess_config(config_path)
+        else:
+            config_path = os.path.join(input, 'sword', reach_data['sword'])
+            config = read_preprocess_config(config_path, run_type)
         prep = prepare_flowlaw_inputs(
             obs["height"], obs["width"], obs["slope"], area_fit,
-            {name: obs[name] for name in QUALITY_VARIABLES}, **config)
+            {name: obs[name] for name in QUALITY_VARIABLES}, dA=obs['d_x_area'],
+            **config)
         obs["width"]=np.where(prep["flowlaw_valid"], prep["width_used"], np.nan)
         obs["slope"]=np.where(prep["flowlaw_valid"], prep["slope_used"], np.nan)
         # prep already applied the outlier limits; do not apply them twice.
