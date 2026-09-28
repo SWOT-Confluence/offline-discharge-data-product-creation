@@ -17,6 +17,11 @@ from offline.ReadQparamsIntegrator import extract_alg #  use with moi dir
 from offline.discharge import compute, empty_q
 from offline.WriteQ import write_q
 from offline.WriteQ2Shp import write_q2shp
+from offline.constrainwidthMM import ConstrainWidth
+from offline.flowlaw_preprocess import (
+    CONFIG_ATTRIBUTES, DEFAULT_OBSERVATION_FILTER, DEFAULT_SLOPE_POLICY,
+    QUALITY_VARIABLES, prepare_flowlaw_inputs, read_config)
+from netCDF4 import Dataset
 
 #Constants constrained
 # INPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input")
@@ -62,6 +67,29 @@ def get_reach_data(reach_json, index_to_run):
     with open(reach_json) as json_file:
         data = json.load(json_file)
     return data[index]
+
+
+def read_preprocess_config(path, branch=None):
+    """Preprocessing options MOI recorded for these flow-law parameters.
+
+    Integrator mode (branch=None, the production path) requires the record.
+    SWORD mode is a fallback that normally reads the original SWORD, which has
+    no record: the defaults are used then instead of stopping the run.
+    """
+    with Dataset(path) as dataset:
+        if branch is None:
+            return read_config(dataset)
+        try:
+            group = dataset['reaches']['discharge_models'][branch]
+        except (IndexError, KeyError):
+            group = None
+        if (group is None or CONFIG_ATTRIBUTES['preprocess_version']
+                not in group.ncattrs()):
+            print(f'No flow-law preprocessing record in {path} ({branch}); '
+                  'using the default preprocessing options')
+            return {'observation_filter': DEFAULT_OBSERVATION_FILTER,
+                    'slope_policy': DEFAULT_SLOPE_POLICY}
+        return read_config(group)
 
 
 def initialize_data_dict(nt, time_steps, reach_id):
@@ -116,17 +144,35 @@ def populate_data_array(data_dict, outputs, index):
 
     # Insert data
     data_dict["d_x_area"][index] = outputs["d_x_area"]
-    data_dict["d_x_area_u"][index] = outputs[
-        "d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
+   
+    data_dict["d_x_area_u"][index] = outputs["d_x_area_u"] if "d_x_area_u" in outputs.keys() else None
 
     for key in DSCHG_KEYS:
-        data_dict[key][index] = outputs[key][0] if type(
-            outputs[key]) is np.ndarray else outputs[key]
+        data_dict[key][index] = outputs[key][0] if type(outputs[key]) is np.ndarray else outputs[key]
 
     # Convert missing values to NaN values
     for k, v in data_dict.items():
         if k != "nt" and k != "reach_id" and k != "time_steps":
             v[np.isclose(v, -1.00000000e+12)] = np.nan
+def build_filter_dic(obs,i):
+    filterdict={}
+    filterdict['time']=obs['time'][i]
+    filterdict['xtrk_dist']=obs['xtrk_dist'][i]
+    filterdict['ice_clim_f']=obs['ice_clim_f'][i]
+    filterdict['dark_frac']=obs['dark_frac'][i]
+    filterdict['obs_frac_n']=obs['obs_frac_n'][i]
+    filterdict['xovr_cal_q']=obs['xovr_cal_q'][i]
+    filterdict['n_good_nod']=obs['n_good_nod'][i]
+    filterdict['p_width']=obs['p_width'][i]
+    filterdict['p_length']=obs['p_length'][i]
+    filterdict['reach_q_b']=obs['reach_q_b'][i]
+    filterdict['W_upper_outlier']=obs['W_upper_outlier']
+    filterdict['W_lower_outlier']=obs['W_lower_outlier']
+    filterdict['H_upper_outlier']=obs['H_upper_outlier']
+    filterdict['H_lower_outlier']=obs['H_lower_outlier']
+    filterdict['S_upper_outlier']=obs['S_upper_outlier']
+    filterdict['S_lower_outlier']=obs['S_lower_outlier']
+    return filterdict                       
 
 
 def main(input, output, index_to_run):
@@ -165,7 +211,7 @@ def main(input, output, index_to_run):
     if input_type == 'timeseries':
         reach_data = get_reach_data(reach_json, index_to_run)
         obs = Rivertile(os.path.join(input , "swot" , reach_data["swot"]), input_type)
-        print(flp_source)
+        
         if flp_source == 'sword':
             priors = ReachDatabase(os.path.join(input , "sword" , reach_data["sword"]),
                                    reach_data["reach_id"])
@@ -179,14 +225,39 @@ def main(input, output, index_to_run):
         else:
             sys.exit('Warning: flp source not valid, exiting')
 
-        # Compute discharge
+        # Observation filter, width and slope exactly as MOI prepared them when
+        # it fitted these parameters (offline/flowlaw_preprocess.py is shared
+        # with MOI; the options come from the integrator file).
+        area_fit={}
+        area_fit['h_break']=obs['h_break']
+        area_fit['fit_coeffs']=obs['fit_coeffs']
+        if flp_source == 'integrator':
+            config_path = os.path.join(
+                FLPE_DIR, f'{int(reach_data["reach_id"])}_integrator.nc')
+            config = read_preprocess_config(config_path)
+        else:
+            config_path = os.path.join(input, 'sword', reach_data['sword'])
+            config = read_preprocess_config(config_path, run_type)
+        prep = prepare_flowlaw_inputs(
+            obs["height"], obs["width"], obs["slope"], area_fit,
+            {name: obs[name] for name in QUALITY_VARIABLES}, dA=obs['d_x_area'],
+            **config)
+        obs["width"]=np.where(prep["flowlaw_valid"], prep["width_used"], np.nan)
+        obs["slope"]=np.where(prep["flowlaw_valid"], prep["slope_used"], np.nan)
+        # prep already applied the outlier limits; do not apply them twice.
+        for limit in ("H_lower_outlier", "W_lower_outlier", "S_lower_outlier"):
+            obs[limit] = -np.inf
+        for limit in ("H_upper_outlier", "W_upper_outlier", "S_upper_outlier"):
+            obs[limit] = np.inf
+        # Compute discharge        
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
                                          reach_data["reach_id"])
         for i in range(obs["nt"]):
+            filterdict=build_filter_dic(obs,i)            
             outputs = compute(priors, obs["height"][i], obs["wse_u"][i],
                               obs["width"][i], obs["width_u"][i],
                               obs["slope"][i], obs["slope_u"][i],
-                              obs["d_x_area"][i], obs["d_x_area_u"][i])
+                              obs["d_x_area"][i], obs["d_x_area_u"][i],filterdict)
             populate_data_array(data_dict, outputs, i)
 
         # Output discharge model values
@@ -238,7 +309,7 @@ if __name__ == "__main__":
     except IndexError:
         index_to_run = -235  # AWS
 
-    # print('indx=',index_to_run)
+   
 
     main(INPUT, OUTPUT, index_to_run)
 

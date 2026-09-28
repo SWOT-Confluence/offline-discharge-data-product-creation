@@ -104,6 +104,8 @@ def ReachDatabase(reach_db_path, rch):
         reach['discharge_models']['constrained']['SIC4DVar'][key] \
             = np.array(dataset['reaches']['discharge_models']
                        ['constrained']['SIC4DVar'][key][reach_ind])
+
+    reach['p_slope']=dataset['reaches']['slope_obs_p50'][reach_ind]
     dataset.close()
 
     return reach
