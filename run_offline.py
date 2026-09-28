@@ -18,6 +18,10 @@ from offline.discharge import compute, empty_q
 from offline.WriteQ import write_q
 from offline.WriteQ2Shp import write_q2shp
 from offline.constrainwidthMM import ConstrainWidth
+from offline.flowlaw_preprocess import (
+    CONFIG_ATTRIBUTES, DEFAULT_OBSERVATION_FILTER, DEFAULT_SLOPE_POLICY,
+    QUALITY_VARIABLES, prepare_flowlaw_inputs, read_config)
+from netCDF4 import Dataset
 
 #Constants constrained
 # INPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input")
@@ -63,6 +67,29 @@ def get_reach_data(reach_json, index_to_run):
     with open(reach_json) as json_file:
         data = json.load(json_file)
     return data[index]
+
+
+def read_preprocess_config(path, branch=None):
+    """Preprocessing options MOI recorded for these flow-law parameters.
+
+    Integrator mode (branch=None, the production path) requires the record.
+    SWORD mode is a fallback that normally reads the original SWORD, which has
+    no record: the defaults are used then instead of stopping the run.
+    """
+    with Dataset(path) as dataset:
+        if branch is None:
+            return read_config(dataset)
+        try:
+            group = dataset['reaches']['discharge_models'][branch]
+        except (IndexError, KeyError):
+            group = None
+        if (group is None or CONFIG_ATTRIBUTES['preprocess_version']
+                not in group.ncattrs()):
+            print(f'No flow-law preprocessing record in {path} ({branch}); '
+                  'using the default preprocessing options')
+            return {'observation_filter': DEFAULT_OBSERVATION_FILTER,
+                    'slope_policy': DEFAULT_SLOPE_POLICY}
+        return read_config(group)
 
 
 def initialize_data_dict(nt, time_steps, reach_id):
@@ -198,13 +225,30 @@ def main(input, output, index_to_run):
         else:
             sys.exit('Warning: flp source not valid, exiting')
 
-        #constrain width need to make this optional in the future
+        # Observation filter, width and slope exactly as MOI prepared them when
+        # it fitted these parameters (offline/flowlaw_preprocess.py is shared
+        # with MOI; the options come from the integrator file).
         area_fit={}
-        area_fit['h_break']=obs['h_break'][:]
-        area_fit['fit_coeffs']=obs['fit_coeffs'][:] #slope: index 1; intercept: index 0
-        nt=len(obs["height"][:])
-        hhat,what=ConstrainWidth(obs["height"][:],obs["width"][:],area_fit,nt)
-        obs["width"]=what
+        area_fit['h_break']=obs['h_break']
+        area_fit['fit_coeffs']=obs['fit_coeffs']
+        if flp_source == 'integrator':
+            config_path = os.path.join(
+                FLPE_DIR, f'{int(reach_data["reach_id"])}_integrator.nc')
+            config = read_preprocess_config(config_path)
+        else:
+            config_path = os.path.join(input, 'sword', reach_data['sword'])
+            config = read_preprocess_config(config_path, run_type)
+        prep = prepare_flowlaw_inputs(
+            obs["height"], obs["width"], obs["slope"], area_fit,
+            {name: obs[name] for name in QUALITY_VARIABLES}, dA=obs['d_x_area'],
+            **config)
+        obs["width"]=np.where(prep["flowlaw_valid"], prep["width_used"], np.nan)
+        obs["slope"]=np.where(prep["flowlaw_valid"], prep["slope_used"], np.nan)
+        # prep already applied the outlier limits; do not apply them twice.
+        for limit in ("H_lower_outlier", "W_lower_outlier", "S_lower_outlier"):
+            obs[limit] = -np.inf
+        for limit in ("H_upper_outlier", "W_upper_outlier", "S_upper_outlier"):
+            obs[limit] = np.inf
         # Compute discharge        
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
                                          reach_data["reach_id"])
