@@ -18,6 +18,9 @@ from offline.discharge import compute, empty_q
 from offline.WriteQ import write_q
 from offline.WriteQ2Shp import write_q2shp
 from offline.constrainwidthMM import ConstrainWidth
+from offline.flowlaw_preprocess import (
+    QUALITY_VARIABLES, prepare_flowlaw_inputs, read_config)
+from netCDF4 import Dataset
 
 #Constants constrained
 # INPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input")
@@ -63,6 +66,13 @@ def get_reach_data(reach_json, index_to_run):
     with open(reach_json) as json_file:
         data = json.load(json_file)
     return data[index]
+
+
+def read_preprocess_config(flpe_dir, reach_id):
+    """Preprocessing options MOI recorded in this reach's integrator file."""
+    path = os.path.join(flpe_dir, f"{int(reach_id)}_integrator.nc")
+    with Dataset(path) as dataset:
+        return read_config(dataset)
 
 
 def initialize_data_dict(nt, time_steps, reach_id):
@@ -198,13 +208,24 @@ def main(input, output, index_to_run):
         else:
             sys.exit('Warning: flp source not valid, exiting')
 
-        #constrain width need to make this optional in the future
+        # Observation filter, width and slope exactly as MOI prepared them when
+        # it fitted these parameters (offline/flowlaw_preprocess.py is shared
+        # with MOI; the options come from the integrator file).
         area_fit={}
-        area_fit['h_break']=obs['h_break'][:]
-        area_fit['fit_coeffs']=obs['fit_coeffs'][:] #slope: index 1; intercept: index 0
-        nt=len(obs["height"][:])
-        hhat,what=ConstrainWidth(obs["height"][:],obs["width"][:],area_fit,nt)
-        obs["width"]=what
+        area_fit['h_break']=obs['h_break']
+        area_fit['fit_coeffs']=obs['fit_coeffs']
+        config = (read_preprocess_config(FLPE_DIR, reach_data["reach_id"])
+                  if flp_source == 'integrator' else {})
+        prep = prepare_flowlaw_inputs(
+            obs["height"], obs["width"], obs["slope"], area_fit,
+            {name: obs[name] for name in QUALITY_VARIABLES}, **config)
+        obs["width"]=np.where(prep["flowlaw_valid"], prep["width_used"], np.nan)
+        obs["slope"]=np.where(prep["flowlaw_valid"], prep["slope_used"], np.nan)
+        # prep already applied the outlier limits; do not apply them twice.
+        for limit in ("H_lower_outlier", "W_lower_outlier", "S_lower_outlier"):
+            obs[limit] = -np.inf
+        for limit in ("H_upper_outlier", "W_upper_outlier", "S_upper_outlier"):
+            obs[limit] = np.inf
         # Compute discharge        
         data_dict = initialize_data_dict(obs["nt"], obs["time_steps"],
                                          reach_data["reach_id"])
