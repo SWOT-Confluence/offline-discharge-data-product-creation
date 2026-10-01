@@ -5,13 +5,63 @@ copied from RiverObs/src/SWOTRiver
 import numpy as np
 import warnings
 
+#SIC4DVAR imports
+from sic4dvar_files.sic4dvar_reach_methods import compute_sic4dvar_discharge_reach
+from sic4dvar_files.sic4dvar_node_methods import compute_sic4dvar_discharge_node
+
 MISSING_VALUE_INT4 = -999
 MISSING_VALUE_INT9 = -99999999
 MISSING_VALUE_FLT = -999999999999
 
+def filterNRTdata(reach_height, reach_height_u, reach_width, reach_width_u,
+            reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
+    if filterdict !=None:
+        badob=False #keep ob unless filter is tripped
+        if np.isnan(filterdict['time']):
+            badob=True
+        else:                    
+            badob=np.any((np.abs(filterdict['xtrk_dist']) > 60e3) |\
+            (np.abs(filterdict['xtrk_dist']) < 10e3) | \
+            (filterdict['ice_clim_f'] > 1)|\
+            (filterdict['dark_frac'] > .6)|\
+            (filterdict['obs_frac_n'] < .4)|\
+            (filterdict['xovr_cal_q'] > 1)|\
+            (filterdict['n_good_nod'] < 10)|\
+            (filterdict['p_width'] < 60)|\
+            (filterdict['p_length'] < 5000)|\
+            (filterdict['reach_q_b'] > 507510784)|\
+            (reach_height<filterdict['H_lower_outlier'])|\
+            (reach_height>filterdict['H_upper_outlier'])|\
+            (reach_width<filterdict['W_lower_outlier'])|\
+            (reach_width>filterdict['W_upper_outlier'])|\
+            (reach_slope<filterdict['S_lower_outlier'])|\
+            (reach_slope>filterdict['S_upper_outlier']))          
+        if badob:
+                reach_height=MISSING_VALUE_FLT
+                reach_height_u=MISSING_VALUE_FLT
+                reach_width=MISSING_VALUE_FLT
+                reach_width_u=MISSING_VALUE_FLT
+                reach_slope=MISSING_VALUE_FLT
+                reach_slope_u=MISSING_VALUE_FLT
+                reach_d_x_area=MISSING_VALUE_FLT
+                reach_d_x_area_u=MISSING_VALUE_FLT
+    return reach_height, reach_height_u,reach_width,reach_width_u,reach_slope,reach_slope_u,reach_d_x_area,reach_d_x_area_u
+
 
 def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
-            reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u):
+            reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
+    
+    """Apply filters that resemble confluence before computing discharge"""
+    reach_height, reach_height_u,reach_width,\
+    reach_width_u,reach_slope,reach_slope_u,\
+    reach_d_x_area, reach_d_x_area_u = filterNRTdata(\
+    reach_height, reach_height_u, reach_width, \
+    reach_width_u,reach_slope, reach_slope_u,\
+    reach_d_x_area, reach_d_x_area_u,filterdict)
+
+
+
+    
     """Computes the discharge models"""
     if 'area_fit' in reach.keys() and reach_d_x_area is None:
         with warnings.catch_warnings():
@@ -229,16 +279,23 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
         sic4dvar_Abar = models['SIC4DVar']['Abar']
         sic4dvar_s_rel_u = models['SIC4DVar']['sbQ_rel'].item()
 
+        sic4dvar_model = models["SIC4DVar"]
+
         if (reach_width > 0 and reach_slope > 0 and sic4dvar_Abar+d_x_area >= 0
                 and sic4dvar_Abar > 0 and sic4dvar_n > 0):
 
-            sic4dvar_q = (
-                (d_x_area+sic4dvar_Abar)**(5/3) * reach_width**(-2/3) *
-                (reach_slope)**(1/2)) / sic4dvar_n
+            # sic4dvar_q = (
+            #     (d_x_area+sic4dvar_Abar)**(5/3) * reach_width**(-2/3) *
+            #     (reach_slope)**(1/2)) / sic4dvar_n
+
+            sic4dvar_q, _ , _ = compute_sic4dvar_discharge_reach(sic4dvar_model, \
+                    reach_height, reach_width, reach_slope, d_x_area)
+
             sic4dvar_width_u = (2 * reach_width_u) / (3 * reach_width)
             sic4dvar_slp_u = reach_slope_u / (2 * reach_slope)
             sic4dvar_d_x_area_u = 5 * d_x_area_u / (
                         3 * (sic4dvar_Abar + d_x_area))
+
             sic4dvar_r_u = np.sqrt(
                 sic4dvar_width_u**2 + sic4dvar_slp_u**2 +
                 sic4dvar_d_x_area_u**2)
@@ -370,6 +427,41 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
 
     return outputs
 
+"""SIC4DVAR COMMENTS FOR NODE METHOD OF COMPUTE()
+call compute_sic4dvar_discharge_node(sic4dvar_model, \
+                    node_height, node_width, node_slope, node_d_x_area, \
+                    node_ids, sword_data, debug=debug)
+
+Needed inputs for compute_sic4dvar_discharge_node:
+From input_data:
+- node_height
+- node_width
+- node_slope
+- node_d_x_area
+- node_ids (like in SWOT files)
+
+From SWORD (sword_data dictionary):
+-reach_id
+-dist_out
+-node_length
+-nodes/node_id
+-nodes/reach_id
+-nodes/node_order
+
+From SIC4DVar model (models["SIC4DVar"])/outputs read in ReadQParams or ReadPRD (or similar structure ?)
+(with exact name of variable):
+-width
+-elevation
+-SLOPEM1_constant
+-mean_elevation_profile
+-quantile_matrix
+-prior_used
+-Zb_acc
+-K
+
+After integrator if Q is computed:
+-put 'q_integrator' in sword_dict !
+"""
 
 def area(observed_height, observed_height_u, observed_width, observed_width_u,
          area_fits):

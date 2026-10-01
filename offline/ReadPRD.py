@@ -35,7 +35,9 @@ def ReachDatabase(reach_db_path, rch):
     hivdi_key = ['Abar', 'alpha', 'beta', 'sbQ_rel']
     momma_key = ['B', 'H', 'Save', 'sbQ_rel']
     sads_key = ['Abar', 'n', 'sbQ_rel']
-    sic4dvar_key = ['Abar', 'n', 'sbQ_rel']
+    sic4dvar_key = ['Abar', 'n', 'sbQ_rel', 'reach_xr', 'reach_yr', \
+        'width', 'elevation', 'SLOPEM1_constant', 'mean_elevation_profile', \
+        'quantile_matrix', 'prior_used', 'Zb_acc', 'K']
 
     # area fits
     for key in area_fit_key:
@@ -104,6 +106,8 @@ def ReachDatabase(reach_db_path, rch):
         reach['discharge_models']['constrained']['SIC4DVar'][key] \
             = np.array(dataset['reaches']['discharge_models']
                        ['constrained']['SIC4DVar'][key][reach_ind])
+
+    reach['p_slope']=dataset['reaches']['slope_obs_p50'][reach_ind]
     dataset.close()
 
     return reach

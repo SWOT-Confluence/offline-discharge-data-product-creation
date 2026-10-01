@@ -168,16 +168,42 @@ def extract_valid(r_id, run_type, gb_file, hv_file, mo_file, sd_file,
 
     # sic4dvar
     sv = Dataset(sv_file, 'r', format="NETCDF4")
-    index = np.where(mm["reach_id"][:] == int(r_id))
+    index = np.where(sv["reach_id"][:] == int(r_id))
     alg_dict[run_type]['SIC4DVar'] = {
+        #Reach
         "n": sv["n"][:].filled(np.nan),
-        "Abar": np.array(sv["A0"][:].filled(np.nan))
+        "Abar": np.array(sv["A0"][:].filled(np.nan)),
+        "reach_xr": np.array(sv["reach_xr"][:].filled(np.nan)),
+        "reach_yr": np.array(sv["reach_yr"][:].filled(np.nan)),
+
+        #Node
+        "width": np.array(sv["width"][:].filled(np.nan)),
+        "elevation": np.array(sv["elevation"][:].filled(np.nan)),
+        "SLOPEM1_constant": np.array(sv["SLOPEM1_constant"][:].filled(np.nan)),
+        "mean_elevation_profile": np.array(sv["mean_elevation_profile"][:].filled(np.nan)),
+        "quantile_matrix": np.array(sv["quantile_matrix"][:].filled(np.nan)),
+        "prior_used": np.array(sv["prior_used"][:].filled(np.nan)),
+        "Zb_acc": np.array(sv["Zb_acc"][:].filled(np.nan)),
+        "K": np.array(sv["K"][:].filled(np.nan))
     }
     alg_dict[non_run_type]['SIC4DVar'] = {
+        #Reach
         "n": non_run_array,
-        "Abar": non_run_array
+        "Abar": non_run_array,
+        "reach_xr": non_run_array,
+        "reach_yr": non_run_array,
+
+        #Node
+        "width": non_run_array,
+        "elevation": non_run_array,
+        "SLOPEM1_constant": non_run_array,
+        "mean_elevation_profile": non_run_array,
+        "quantile_matrix": non_run_array,
+        "prior_used": non_run_array,
+        "Zb_acc": non_run_array,
+        "K": non_run_array,
     }
-    sd.close()
+    sv.close()
 
     return alg_dict
 
