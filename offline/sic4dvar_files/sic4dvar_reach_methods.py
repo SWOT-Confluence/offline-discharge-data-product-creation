@@ -1,3 +1,21 @@
+"""
+SIC4DVAR-LC
+Copyright (C) 2025 INRAE
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import numpy as np
 import pandas as pd
 
@@ -36,24 +54,6 @@ def compute_sic4dvar_discharge_reach(sic4dvar_model, reach_height, reach_width, 
         Q_da = sic4dvar_model["Q_da"]
         Q_mm = sic4dvar_model["Q_mm"]
     final_Q = MISSING_VALUE_FLT
-
-    #Additional checks ?
-    # count = {'invalid_width': 0, 'invalid_slope': 0, 'invalid_d_x_area': 0, 'invalid_height': 0}
-    # for t in range(0,len(reach_height)):
-    #     if reach_width[t] <= 0. or check_na(reach_width[t]):
-    #         count['invalid_width'] += 1
-    #     if reach_slope[t] <= 0. or check_na(reach_slope[t]):
-    #         count['invalid_slope'] += 1
-    #     if check_na(reach_d_x_area[t]) or (reach_d_x_area[t]+sic4dvar_Abar <= 0.):
-    #         count['invalid_d_x_area'] += 1
-    #     if check_na(reach_height[t]):
-    #         count['invalid_height'] += 1
-
-    # for key in count.keys():
-    #     if count[key] == len(reach_height):
-    #         logging.warning(f"Invalid data for {key}: {count[key]} occurrences")
-    #         valid = False
-    #         return final_Q, reach, valid
 
     if check_na(sic4dvar_Abar) or check_na(sic4dvar_n):
         #logging.warning("Missing required SIC4DVar parameters: Abar or n")
