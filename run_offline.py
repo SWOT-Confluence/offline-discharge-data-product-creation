@@ -21,12 +21,12 @@ from offline.constrainwidthMM import ConstrainWidth
 
 #Constants constrained
 # INPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input")
-INPUT = os.path.join('/mnt', 'data', 'input')
-FLPE_DIR = os.path.join('/mnt', 'data', 'moi')
+INPUT = Path('/mnt', 'data', 'input') #os.path.join('/mnt', 'data', 'input')
+FLPE_DIR = Path('/mnt', 'data', 'moi') #os.path.join('/mnt', 'data', 'moi')
 # FLPE_DIR = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/constrained_moi_update")
 #FLPE_DIR = Path("/Users/rwei/Documents/confluence/OneDrive_1_9-23-2022/offline_inputs/mnt/flpe")
 # OUTPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/constrained_output_apr27")
-OUTPUT = os.path.join('/mnt', 'data', 'output')
+OUTPUT = Path('/mnt', 'data', 'output') #os.path.join('/mnt', 'data', 'output')
 # SWORD dir for single_pass run
 # read in reach json
 SWORD = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/input/sword/na_sword_v11_moi.nc")
@@ -38,6 +38,11 @@ SWORD = Path("/Users/rwei/Documents/confluence/offline_data_mar/constrained/mnt/
 # OUTPUT = Path("/Users/rwei/Documents/confluence/offline_data_mar/unconstrained/mnt/unconstrained_output")
 # # SWORD dir for single_pass run
 # SWORD = Path("/Users/rwei/Documents/confluence/offline_data_mar/unconstrained/mnt/input/sword/na_sword_v11_moi.nc")
+
+# #D.Q DEBUG:
+# #DEBUG:
+# INPUT = Path('/mnt/DATA/worksync/sic4dvar_lc_source_code/L2_module/')
+# SWORD = Path('/mnt/DATA/worksync/files/data/sos_results/SVS_run_20-05-2026/just_af/af_sword_v17_SOS_results.nc')
 
 DSCHG_KEYS = [
     'dschg' + a + b + c for a in ['_', '_g']
@@ -223,7 +228,6 @@ def main(input, output, index_to_run):
     if input_type == 'single_pass':
         input_shapefile = input.joinpath('shapefile')
         shapefiles = list(input_shapefile.glob('SWOT_L2_HR_RiverSP_reach*.shp'))
-
         for shapefile in shapefiles:
             print('SHAPEFILE: ', shapefile)
             obs = Rivertile(shapefile, input_type)
@@ -264,9 +268,6 @@ if __name__ == "__main__":
         index_to_run = int(sys.argv[5])  # integer
     except IndexError:
         index_to_run = -235  # AWS
-
-   
-
     main(INPUT, OUTPUT, index_to_run)
 
     end = datetime.now()
