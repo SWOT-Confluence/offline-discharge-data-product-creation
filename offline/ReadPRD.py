@@ -61,7 +61,7 @@ def ReachDatabase(reach_db_path, rch):
     for key in bam_key:
         reach['discharge_models']['unconstrained']['BUSBOI'][key] \
             = np.array(dataset['reaches']['discharge_models']
-                       ['unconstrained']['BUSBOI'][key][reach_ind])
+                       ['unconstrained']['BAM'][key][reach_ind])
     for key in hivdi_key:
         reach['discharge_models']['unconstrained']['HiVDI'][key] \
             = np.array(dataset['reaches']['discharge_models']
@@ -87,7 +87,7 @@ def ReachDatabase(reach_db_path, rch):
     for key in bam_key:
         reach['discharge_models']['constrained']['BUSBOI'][key] \
             = np.array(dataset['reaches']['discharge_models']
-                       ['constrained']['BUSBOI'][key][reach_ind])
+                       ['constrained']['BAM'][key][reach_ind])
     for key in hivdi_key:
         reach['discharge_models']['constrained']['HiVDI'][key] \
             = np.array(dataset['reaches']['discharge_models']
