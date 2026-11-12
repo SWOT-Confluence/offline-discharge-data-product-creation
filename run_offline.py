@@ -210,7 +210,7 @@ def main(input, output, index_to_run):
     # Input timeseries data
     if input_type == 'timeseries':
         reach_data = get_reach_data(reach_json, index_to_run)
-        obs = Rivertile(os.path.join(input , "swot" , reach_data["swot"]), input_type)
+        obs = Rivertile(os.path.join(input , "swot" , reach_data["swot"][-3:],"_moi.nc" ), input_type)
         
         if flp_source == 'sword':
             priors = ReachDatabase(os.path.join(FLPE_DIR , "sword_l2" , reach_data["sword"]),
