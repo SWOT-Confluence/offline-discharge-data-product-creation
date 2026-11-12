@@ -213,7 +213,7 @@ def main(input, output, index_to_run):
         obs = Rivertile(os.path.join(input , "swot" , reach_data["swot"]), input_type)
         
         if flp_source == 'sword':
-            priors = ReachDatabase(os.path.join(FLPE_DIR , "sword_l2" , reach_data["sword"][0:-3],"_moi.nc"),
+            priors = ReachDatabase(os.path.join(FLPE_DIR , "sword_l2" , reach_data["sword"][0:-3]+"_moi.nc"),
                                    reach_data["reach_id"])
             # if dA from timeseries, remove 'area_fit' params, so discharge module
             # won't compute dA again, don't need to set up dA source
