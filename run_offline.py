@@ -236,7 +236,7 @@ def main(input, output, index_to_run):
                 FLPE_DIR, f'{int(reach_data["reach_id"])}_integrator.nc')
             config = read_preprocess_config(config_path)
         else:
-            config_path = os.path.join(input, 'sword', reach_data['sword'])
+            config_path = os.path.join(FLPE_DIR, 'sword_l2', reach_data['sword'][0:-3]+"_moi.nc")
             config = read_preprocess_config(config_path, run_type)
         prep = prepare_flowlaw_inputs(
             obs["height"], obs["width"], obs["slope"], area_fit,
