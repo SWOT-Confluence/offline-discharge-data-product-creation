@@ -151,7 +151,7 @@ def Rivertile(rivertile_path, input_type):
                      'nt': dataset.dimensions["nt"].size, "time_steps": dataset["observations"][:],
                      'time':dataset['reach']['time'][:].filled(np.nan),
                      'xtrk_dist':dataset['reach']['xtrk_dist'][:].filled(np.nan),
-                     'ice_clim_f':dataset['reach']['ice_clim_f'][:].filled(np.nan),
+                     'ice_clim_f':dataset['reach']['ice_clim_f'][:].astype(float).filled(np.nan),
                      'dark_frac':dataset['reach']['dark_frac'][:].filled(np.nan),
                      'obs_frac_n':dataset['reach']['obs_frac_n'][:].filled(np.nan),
                      'xovr_cal_q':dataset['reach']['xovr_cal_q'][:].filled(np.nan),

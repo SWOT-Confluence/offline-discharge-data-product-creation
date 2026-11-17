@@ -307,14 +307,14 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
         q_results = np.ma.masked_values([metro_q, bb_q, hivdi_q, momma_q,
                                          sads_q, sic4dvar_q],
                                         MISSING_VALUE_FLT)
-        print('r_u')
-        print([metro_r_u, bb_r_u, hivdi_r_u, momma_r_u,sads_r_u, sic4dvar_r_u])
+        #print('r_u')
+        #print([metro_r_u, bb_r_u, hivdi_r_u, momma_r_u,sads_r_u, sic4dvar_r_u])
         q_r_u = np.ma.masked_values([metro_r_u, bb_r_u, hivdi_r_u, momma_r_u,
                                      sads_r_u, sic4dvar_r_u],
                                     MISSING_VALUE_FLT)
-        print(q_r_u)
-        print('q_s_u')
-        print([metro_s_u, bb_s_u, hivdi_s_u,momma_s_u, sads_s_u, sic4dvar_s_u])
+        #print(q_r_u)
+        #print('q_s_u')
+        #print([metro_s_u, bb_s_u, hivdi_s_u,momma_s_u, sads_s_u, sic4dvar_s_u])
         q_s_u = np.ma.masked_values([metro_s_u, bb_s_u, hivdi_s_u,
                                      momma_s_u, sads_s_u, sic4dvar_s_u],
                                     MISSING_VALUE_FLT)
