@@ -43,6 +43,13 @@ def filterNRTdata(reach_height, reach_height_u, reach_width, reach_width_u,
                 reach_d_x_area_u=MISSING_VALUE_FLT
     return reach_height, reach_height_u,reach_width,reach_width_u,reach_slope,reach_slope_u,reach_d_x_area,reach_d_x_area_u
 
+def _reach_scalar(value):
+    """One parameter per reach, independent of its NetCDF dimensions."""
+    values = np.ma.asarray(value, dtype=float)
+    if values.size != 1:
+        raise ValueError('expected one parameter value per reach, got %s'
+                         % (values.shape,))
+    return np.float64(np.ma.filled(values, np.nan).reshape(-1)[0])
 
 def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
             reach_slope, reach_slope_u, reach_d_x_area, reach_d_x_area_u,filterdict=None):
@@ -84,6 +91,12 @@ def compute(reach, reach_height, reach_height_u, reach_width, reach_width_u,
 
     for key, models in reach['discharge_models'].items():
 
+        models = {
+            model: {name: _reach_scalar(value)
+                    for name, value in parameters.items()}
+            for model, parameters in models.items()
+        }
+        
         metro_ninf = models['MetroMan']['ninf']
         metro_Abar = models['MetroMan']['Abar']
         metro_p = models['MetroMan']['p']
